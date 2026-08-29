@@ -1,0 +1,11 @@
+build/
+
+# Generated flash scripts (scripts/hex_to_flash.py output etc.)
+# Repository-root only — openocd/tools/*.tcl is tracked.
+/*.tcl
+
+# Editor backups
+*~
+
+# Local Claude Code settings
+.claude/settings.local.json

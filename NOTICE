@@ -1,0 +1,40 @@
+solist_ai_gcc_template
+Copyright (c) 2026 p-ban.com Corp. (株式会社ピーバンドットコム)
+
+WHAT YOU MAY DO WITH THIS REPOSITORY
+
+  Use and modify it to develop firmware for microcontrollers manufactured
+  by ROHM Co., Ltd. (including LAPIS-branded products), and ship that
+  firmware in binary form inside your own products.
+
+  You may NOT redistribute the source of this repository, or a derivative
+  of it, to third parties.
+
+  Those terms apply uniformly, whether a given file is owned by p-ban.com
+  Corp. or by ROHM Co., Ltd. See LICENSE (LICENSE.ja is the authoritative
+  Japanese text).
+
+WHO OWNS WHAT
+
+  p-ban.com Corp.  build system, application scaffold, on-target test
+                   framework, OpenOCD flash workflow, documentation.
+                   Licensed to you under LICENSE.
+
+  ROHM Co., Ltd.   peripheral drivers (driver/inc, driver/src), board
+                   utilities (utility/board), the CMSIS device header
+                   (ml63q25x7/include/ML63Q25x7.h), the code option block
+                   (src/codeoption*), and the UARTF interrupt dispatch
+                   (src/uartf_int*) — derived from the ML63Q2500 Reference
+                   Software. Copyright ROHM. Governed by ROHM's notice in
+                   each file, not by LICENSE. p-ban.com Corp. cannot
+                   sublicense them.
+
+EXCEPTION — APACHE-2.0 COMPONENTS
+
+  The startup, system, and linker script files (ml63q25x7/Source,
+  ml63q25x7/include/system_ML63Q25x7.h) are copyright
+  ROHM Co., Ltd. with portions copyright Arm Limited, and external/CMSIS is
+  a git submodule copyright Arm Limited. All are Apache-2.0 and are NOT
+  restricted by LICENSE. See LICENSE.apache-2.0.
+
+THIRD_PARTY_LICENSES.md has the per-file breakdown.

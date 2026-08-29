@@ -1,0 +1,39 @@
+# Copyright (c) 2026 p-ban.com Corp.
+# SPDX-License-Identifier: LicenseRef-p-ban-solist-ai-gcc-template
+# See LICENSE (LICENSE.ja is the authoritative Japanese text).
+
+name: build
+
+on:
+  push:
+    branches: [main, public]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install arm-none-eabi toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build -j"$(nproc)"
+
+      - name: Report size
+        run: arm-none-eabi-size build/solist_ai_template build/tests/solist_ai_template_test

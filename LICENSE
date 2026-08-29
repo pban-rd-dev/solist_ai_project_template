@@ -1,0 +1,83 @@
+solist_ai_gcc_template — Software License Agreement
+
+Copyright (c) 2026 p-ban.com Corp. (株式会社ピーバンドットコム)
+All rights reserved.
+
+A Japanese version of this agreement is available as `LICENSE.ja`.
+In the event of any discrepancy in interpretation between the English and
+Japanese versions, the Japanese version shall prevail.
+
+1. Definitions
+   "Software" means all files contained in this repository, excluding the
+   Apache-2.0 Components defined in Section 5.
+   "ROHM Software" means those parts of the Software whose copyright is held
+   by ROHM Co., Ltd. The files concerned are listed in Section 2 of
+   `THIRD_PARTY_LICENSES.md`.
+   "Target Microcontroller" means a microcontroller manufactured by
+   ROHM Co., Ltd., including products under the LAPIS brand.
+   "Licensee" means a person or organization that has obtained the Software.
+
+2. Grant of License
+   Subject to the terms of this Agreement, p-ban.com Corp. grants Licensee a
+   non-exclusive, non-transferable, revocable right to use, reproduce, and
+   modify those parts of the Software whose copyright is held by p-ban.com
+   Corp., for the purpose of developing, testing, and running firmware that
+   runs on a Target Microcontroller.
+
+   Licensee may embed firmware in binary form built from those parts into
+   Licensee's own products, and may distribute or sell those products.
+
+3. ROHM Software
+   Copyright in the ROHM Software is held by ROHM Co., Ltd. Its terms of use
+   are determined directly by the ROHM notice reproduced at the head of each
+   such file. p-ban.com Corp. is not in a position to sublicense it, and this
+   Agreement grants no rights whatsoever in the ROHM Software.
+
+   That notice permits use and modification, at Licensee's own
+   responsibility, solely for the purpose of developing software for use with
+   a Target Microcontroller. It grants no right of redistribution. See
+   Section 2 of `THIRD_PARTY_LICENSES.md` for details.
+
+4. Restrictions
+   Except as expressly permitted in Section 2, Licensee shall not:
+   (a) redistribute, sublicense, sell, lease, rent, or otherwise provide the
+       Software or any derivative work thereof in source form to any third
+       party;
+   (b) use the Software to develop for any microcontroller other than a
+       Target Microcontroller;
+   (c) remove or alter any copyright, trademark, or other proprietary notice
+       contained in the Software.
+
+   Item (a) does not restrict the embedding of binary-form firmware into
+   Licensee's products, or the distribution or sale of those products, as
+   permitted by Section 2.
+
+5. Apache-2.0 Components
+   The following are provided under the Apache License, Version 2.0, and this
+   Agreement imposes no restriction whatsoever on them:
+     - the files under `ml63q25x7/Source/` and
+       `ml63q25x7/include/system_ML63Q25x7.h`
+       (Copyright ROHM Co., Ltd., portions Copyright Arm Limited)
+     - `external/CMSIS` (git submodule, Copyright Arm Limited)
+   For the full license text see `LICENSE.apache-2.0` and the license file
+   inside the submodule.
+
+6. No Warranty
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+7. Limitation of Liability
+   IN NO EVENT SHALL P-BAN.COM CORP. BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE,
+   ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+   OTHER DEALINGS IN THE SOFTWARE.
+
+8. Termination
+   This license terminates automatically if Licensee breaches any term of
+   this Agreement. Upon termination, Licensee must cease all use of the
+   Software and destroy all copies in Licensee's possession.
+
+9. Governing Law
+   This Agreement shall be governed by and construed in accordance with the
+   laws of Japan.
