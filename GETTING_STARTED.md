@@ -30,6 +30,17 @@ Add `-DBUILD_TESTS=ON` if you also want the on-target test binary (`solist_ai_te
 
 ## 3. First flash
 
+With a J-Link probe this is one command:
+
+```bash
+scripts/jlink_flash.sh
+```
+
+It programs the `.hex` in `build/` and resets the board. On Windows use
+`powershell -ExecutionPolicy Bypass -File scripts\jlink_flash.ps1`.
+
+The rest of this section covers the OpenOCD route.
+
 The ML63Q2537 has a custom flash controller. You can't use stock `openocd program ... verify reset exit` — the chip needs the PLL up at 48 MHz and a specific unlock sequence first. That logic is already in `openocd/openocd.cfg` as TCL procs; you just have to drive it.
 
 ```bash

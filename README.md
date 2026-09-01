@@ -79,6 +79,31 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 
 ## Flash Programming
 
+### Using J-Link (recommended)
+
+```bash
+scripts/jlink_flash.sh                 # programs the .hex found in build/
+scripts/jlink_flash.sh <build_dir>
+scripts/jlink_flash.sh --file <image>  # .hex / .elf, or .bin with an address
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\jlink_flash.ps1
+```
+
+`jlink/JLinkDevices.xml` declares the ML63Q2537 for J-Link (the MCU is not in its
+built-in database) and binds the flash bank at `0x10000000` to the vendor CMSIS
+flash algorithm `jlink/ML63Q25x7.FLM`, taken from ROHM.ML63Q25x7_DFP 0.4.0.
+J-Link downloads that algorithm into target RAM and runs it on the Cortex-M0+:
+its `Init()` raises the clock to the 48 MHz PLL, and the erase/program loops
+drive the flash controller and clear the watchdog while polling FLASHSTA. SWD
+only carries the image data, instead of one round trip per programmed 32-bit
+word.
+
+Environment overrides: `JLINK_EXE`, `JLINK_SPEED` (kHz, default 4000),
+`JLINK_SN`, `JLINK_VTREF` (mV, for probes whose VTref pin is not wired),
+`JLINK_NO_RUN=1` (leave the core halted instead of reset-and-run).
+
 ### Using OpenOCD
 
 The ML63Q2537 has a custom flash controller that requires the system clock at 48 MHz PLL and a specific accept-flag unlock sequence before any erase/write. All of that is implemented as TCL procs in `openocd/openocd.cfg`, so flashing is a three-step process:
