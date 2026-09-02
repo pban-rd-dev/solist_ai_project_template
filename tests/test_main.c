@@ -22,6 +22,7 @@
 
 /* External test registration functions */
 extern void register_device_tests(void);
+extern void register_uart_tests(void);
 
 /**
  * @brief Main test program
@@ -53,10 +54,8 @@ int main(void)
 
     /* Register all test suites */
     register_device_tests();
-    /* Add more test suite registrations here as they are created:
-     * register_uart_tests();
-     * etc.
-     */
+    register_uart_tests();
+    /* Add more test suite registrations here as they are created */
 
     UART_PRINT_DEBUG("Registered %lu tests", g_test_registry.count);
     UART_PRINT_DEBUG("");

@@ -43,7 +43,10 @@ uint16_t device_initialize(void)
 
   smpl_enablePeripheral(USR_PERI);
 
-  uart_print_init();
+  if (!uart_print_init()) {
+    return 1;
+  }
+
   return 0;
 }
 

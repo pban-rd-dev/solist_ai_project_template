@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 p-ban.com Corp.
+# SPDX-License-Identifier: LicenseRef-p-ban-solist-ai-gcc-template
+# See LICENSE (LICENSE.ja is the authoritative Japanese text).
 #
 # jlink_flash.sh -- program the ML63Q2537 through SEGGER J-Link.
 #

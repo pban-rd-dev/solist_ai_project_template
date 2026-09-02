@@ -1,0 +1,15 @@
+# Copyright (c) 2026 p-ban.com Corp.
+# SPDX-License-Identifier: LicenseRef-p-ban-solist-ai-gcc-template
+# See LICENSE (LICENSE.ja is the authoritative Japanese text).
+
+# THIRD_PARTY_LICENSES.md states that the ROHM reference sources under driver/
+# and utility/ are the originals with line endings converted from CRLF to LF.
+# Without this file that claim depends on each contributor's core.autocrlf
+# setting, and re-copying a file from a CRLF source silently reintroduces CRLF.
+* text=auto eol=lf
+
+# Binary artefacts: no line-ending conversion, no textual diff.
+*.a   binary
+*.FLM binary
+*.bin binary
+*.hex binary

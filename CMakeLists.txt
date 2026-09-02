@@ -22,7 +22,11 @@ project(solist_ai_template
 # Target MCU specifications
 set(MCU_FAMILY ML63Q25x7)
 set(MCU_VARIANT ML63Q2537)
-set(CPU_FLAGS "-mcpu=cortex-m0plus -mthumb")
+# -fno-short-enums matches the ROHM Solist-AI archives in driver/lib, which are
+# built with 32-bit enums. GCC defaults to -fshort-enums for the ARM EABI, and
+# mixing the two makes ld warn that "use of enum values across objects may
+# fail" as soon as anything calls an API taking an enum (e.g. fft_Init).
+set(CPU_FLAGS "-mcpu=cortex-m0plus -mthumb -fno-short-enums")
 
 # Global compile options
 set(CMAKE_C_STANDARD 99)
@@ -36,7 +40,12 @@ set(CMAKE_C_FLAGS_DEBUG "-O0 -g3 -DDEBUG")
 set(CMAKE_C_FLAGS_RELEASE "-Os -DNDEBUG")
 
 # Linker flags
-set(CMAKE_EXE_LINKER_FLAGS "${CPU_FLAGS} -specs=nano.specs -Wl,--gc-sections")
+# newlib-nano is prebuilt with -fshort-enums, so it disagrees with the flag
+# above and ld reports the difference for every object. The disagreement is
+# inert: the C library exposes no enum in its API, while the pair that does
+# matter -- this project's code and the ROHM Solist-AI archives -- now agree on
+# 32-bit enums. Silence the report rather than let it bury real link errors.
+set(CMAKE_EXE_LINKER_FLAGS "${CPU_FLAGS} -specs=nano.specs -Wl,--gc-sections -Wl,--no-enum-size-warning")
 
 # Build options
 option(BUILD_TESTS "Build test binary" OFF)

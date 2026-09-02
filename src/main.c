@@ -16,12 +16,16 @@
 #include "wdt.h"
 
 #include "device.h"
+#include "uart_print.h"
 
 int main(void)
 {
   if (device_initialize() != 0) {
     return -1;
   }
+
+  uart_print_puts("Hello world!\r\n");
+  uart_print_flush();
 
   while (1) {
     wdt_clear();

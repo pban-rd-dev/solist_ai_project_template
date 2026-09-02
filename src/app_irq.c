@@ -24,12 +24,12 @@ void EXI_IRQHandler( void )
 
 void NMI_Handler( void )
 {
-	/* No process */
+  /* No process */
 }
 
 void UAF0_IRQHandler( void )
 {
-	uart_procUartfInt();
+  uart_procUartfInt();
 }
 
 void SIOF0_IRQHandler(void)

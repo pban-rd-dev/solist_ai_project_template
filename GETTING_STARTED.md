@@ -56,7 +56,13 @@ telnet localhost 4444
 > source flash_from_hex.tcl ;# programs the firmware
 ```
 
-Connect a UART adapter to **P33 (TX) / P32 (RX)** at **115200 8N1** and you'll see whatever your `UART_PRINT_*` calls emit (the template `main.c` is silent — see §5 to add logging).
+Connect a UART adapter to **P33 (TX) / P32 (RX)** at **115200 8N1**. Out of the box the template prints one line and then idles:
+
+```
+Hello world!
+```
+
+`uart_print_init()` itself is silent — everything on the wire comes from your own `uart_print_*` / `UART_PRINT_*` calls (see §5.2). Nothing at all means the UART never came up, which `device_initialize()` reports by returning non-zero.
 
 ## 4. What you get out of the box
 
@@ -70,6 +76,7 @@ src/
   codeoption.[ch]   code option block at 0x1003FFC0 (ROHM-derived)
   syscalls.c        newlib stubs (lets you use stdio/etc.)
 driver/             ML63Q2537 peripheral drivers (built as static lib `driver`)
+driver/lib/         ROHM Solist-AI accelerator library, linked and ready (§5.5)
 utility/board/      board helpers — peripheral enable, LED control
 ml63q25x7/Source/   startup code + GCC linker script (1 KB stack, 3 KB heap)
 tests/              on-target test framework + suites
@@ -80,14 +87,23 @@ The default `main.c` is intentionally bare:
 ```c
 int main(void)
 {
-    if (device_initialize() != 0) return -1;
-    while (1) {
-        wdt_clear();
-    }
+  if (device_initialize() != 0) {
+    return -1;
+  }
+
+  uart_print_puts("Hello world!\r\n");
+  uart_print_flush();
+
+  while (1) {
+    wdt_clear();
+  }
+  return 0;
 }
 ```
 
-`device_initialize()` does the heavy lifting — see §5.
+`device_initialize()` does the heavy lifting — see §5. Do not let `main()`
+return: newlib routes it to `_exit()`, which masks interrupts and parks the
+core in a `wfi` loop, so the board goes quiet with no further output.
 
 ## 5. The pieces, and how to use them
 
@@ -100,7 +116,14 @@ One call sets up everything the rest of the template assumes:
 - Enables the UART peripheral via `smpl_enablePeripheral(USR_PERI)`
 - Calls `uart_print_init()` so logging works immediately after
 
-**To use:** call it once at the top of `main()`. Check the return code.
+**To use:** call it once at the top of `main()`, and check the return code:
+`0` means every step succeeded, `1` means `uart_print_init()` could not
+configure UARTF0. Note the two conventions in play — the `device_*` functions
+report success as `0`, `uart_print_init()` reports it as `true`.
+
+The PLL-stable wait is the one step with no error path: if the PLL never
+stabilises, `device_initialize()` spins there clearing the watchdog rather
+than returning.
 
 **To modify:**
 
@@ -122,7 +145,16 @@ Hooks UARTF0 to **115200 8N1 on P33 (TX) / P32 (RX)**. Provides:
 | `UART_PRINT_HEX_DUMP(data, len, prefix)` | hex dump (≥ INFO) |
 | `UART_PRINT_ASSERT(cond)`          | logs and halts on false |
 
-Plus raw helpers: `uart_print_puts`, `uart_print_putc`, `uart_print_printf`, `uart_print_flush`.
+Plus raw helpers: `uart_print_puts`, `uart_print_putc`, `uart_print_printf`,
+`uart_print_flush`, `uart_print_is_ready`, and `uart_print_init` /
+`uart_print_deinit`.
+
+`uart_print_init()` emits nothing itself, so the only bytes on the wire are the
+ones you ask for. It reports success as `true` and returns `false` only when
+UARTF0 does not retain the configuration it was given — in practice, when its
+peripheral clock is not running. `uart_print_is_ready()` is a different
+question: it answers "is the transmitter idle right now", not "did init
+succeed", so do not use it to decide whether to print.
 
 **To use:** just call the macros — `device_initialize()` already brought UART up.
 
@@ -164,12 +196,46 @@ The driver library exposes one header per peripheral. The commonly used ones:
 
 `driver/CMakeLists.txt` controls which `.c` files are compiled into `libdriver.a`. If you start using e.g. timers, add `src/timer0_1.c` to `DRIVER_SOURCES`.
 
-### 5.5 Board utilities — `utility/board/`
+### 5.5 Solist-AI accelerator — `driver/lib/`, `driver/inc/solistAi.h`
+
+This is an AI project template, so the accelerator path is wired up before you
+write a line of application code. `driver/CMakeLists.txt` links one of ROHM's
+prebuilt archives into `libdriver.a`, and `driver/inc/solistAi.h` declares the
+FFT, on-device-learning (ODL) and OSUAD entry points. Include the header and
+call them — no extra build steps.
+
+Pick the variant with the `SOLIST_AI_LIB_512` option:
+
+| Option | Archive | Models | Inputs | Hidden units |
+|---|---|---|---|---|
+| `ON` (default) | `SolistAi_Library_1_512_64.a` | 1 | 512 | 64 |
+| `OFF` | `SolistAi_Library_2_256_64.a` | 2 | 256 | 64 |
+
+```bash
+cmake -S . -B build -DSOLIST_AI_LIB_512=OFF     # 2 models x 256 inputs
+```
+
+The choice also sets `ODL_MAX_INST_NUM` / `ODL_MAX_INPUTS` / `ODL_MAX_UNITS`
+for every target that links `driver`, so the header's array sizes match the
+archive.
+
+**One build flag matters here.** The archives are built with 32-bit enums,
+while GCC defaults to `-fshort-enums` on the ARM EABI. `CPU_FLAGS` in the
+top-level `CMakeLists.txt` therefore carries `-fno-short-enums`; without it
+`ld` warns that "use of enum values across objects may fail" as soon as
+anything calls `fft_Init(uint16_t size, FftWindow window)`. Keep the flag if
+you rework the build.
+
+These archives are **copyright ROHM Co., Ltd.** and carry no header of their
+own — read [`driver/lib/README.md`](driver/lib/README.md) before shipping
+or passing on anything built from them.
+
+### 5.6 Board utilities — `utility/board/`
 
 - `smpl_common.[ch]` — peripheral enable/disable helpers (`smpl_enablePeripheral(...)` and the `*_PERI` flags).
 - `smpl_common_led.[ch]` — simple LED on/off helpers.
 
-### 5.6 Tests — `tests/`
+### 5.7 Tests — `tests/`
 
 A tiny on-target framework. `tests/test_framework.[ch]` defines `TEST_ASSERT*` macros and the registry. Each suite (e.g. `test_device.c`) defines tests with `DEFINE_TEST(...)` and a `register_<name>_tests()` function that `test_main.c` calls during startup. Results are printed over UART.
 

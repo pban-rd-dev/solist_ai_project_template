@@ -11,7 +11,8 @@ Minimal CMake project template for Solist-AI (ML63Q2537) development.
 ├── cmake/                      # CMake toolchain configuration
 ├── driver/                     # Hardware driver library
 │   ├── inc/                    # Driver headers
-│   └── src/                    # Driver implementations
+│   ├── src/                    # Driver implementations
+│   └── lib/                    # ROHM Solist-AI accelerator library (binary)
 ├── utility/                    # Board support utilities
 │   └── board/                  # Board-specific functions
 ├── src/                        # Application source code
@@ -23,7 +24,8 @@ Minimal CMake project template for Solist-AI (ML63Q2537) development.
 ├── scripts/                    # hex_to_flash.py (Intel HEX -> OpenOCD TCL)
 ├── openocd/                    # OpenOCD config with ML63Q2537 flash routines
 ├── .github/workflows/          # Build CI
-├── LICENSE                     # Apache-2.0 (p-ban.com Corp. authored files)
+├── LICENSE                     # Terms for p-ban.com Corp. authored files
+├── LICENSE.apache-2.0          # Apache-2.0 text (startup/system/linker, CMSIS)
 ├── NOTICE                      # Attribution summary
 └── THIRD_PARTY_LICENSES.md     # Per-file license breakdown
 
@@ -134,29 +136,59 @@ telnet localhost 4444
 - **Flash**: 256KB (starts at 0x10000000)
 - **RAM**: 16KB (starts at 0x20000000)
 
+## Solist-AI Accelerator
+
+The AI path is wired up out of the box. `driver/CMakeLists.txt` links one of
+ROHM's prebuilt archives from `driver/lib/` into `libdriver.a`, and
+`driver/inc/solistAi.h` declares the FFT, on-device-learning (ODL) and OSUAD
+entry points — include the header and call them, no extra build steps.
+
+| CMake option | Archive | Models | Inputs | Hidden units |
+|---|---|---|---|---|
+| `-DSOLIST_AI_LIB_512=ON` (default) | `SolistAi_Library_1_512_64.a` | 1 | 512 | 64 |
+| `-DSOLIST_AI_LIB_512=OFF` | `SolistAi_Library_2_256_64.a` | 2 | 256 | 64 |
+
+The selection also sets `ODL_MAX_INST_NUM` / `ODL_MAX_INPUTS` /
+`ODL_MAX_UNITS` for every target linking `driver`, so the header's array sizes
+match the archive that is actually linked.
+
+The archives are compiled with 32-bit enums, which is why `CPU_FLAGS` carries
+`-fno-short-enums`: GCC defaults to `-fshort-enums` on the ARM EABI, and
+without the flag `ld` warns that "use of enum values across objects may fail"
+as soon as anything calls `fft_Init(uint16_t size, FftWindow window)`.
+
+These archives are **copyright ROHM Co., Ltd.** — see
+[`driver/lib/README.md`](driver/lib/README.md).
+
 ## Application Entry Point
 
-The template's `src/main.c` is a minimal scaffold: it calls `device_initialize()` (which configures the system clock and starts a 2-second watchdog) and then loops, clearing the watchdog. Drop your application code into the loop body.
+The template's `src/main.c` is a minimal scaffold: it calls `device_initialize()` (which configures the system clock, starts a 2-second watchdog and brings up UARTF0), prints a greeting at 115200 8N1 on P33/P32, and then loops, clearing the watchdog. Drop your application code into the loop body.
 
 ```c
 #include <stdint.h>
 #include "ML63Q25x7.h"
 #include "wdt.h"
 #include "device.h"
+#include "uart_print.h"
 
 int main(void)
 {
-    if (device_initialize() != 0) {
-        return -1;
-    }
+  if (device_initialize() != 0) {
+    return -1;
+  }
 
-    while (1) {
-        wdt_clear();
-        /* Your application code here */
-    }
-    return 0;
+  uart_print_puts("Hello world!\r\n");
+  uart_print_flush();
+
+  while (1) {
+    wdt_clear();
+    /* Your application code here */
+  }
+  return 0;
 }
 ```
+
+`device_initialize()` returns `0` on success and non-zero if a step failed — `1` means UARTF0 could not be configured. Don't let `main()` return: newlib routes it to `_exit()`, which masks interrupts and parks the core in a `wfi` loop.
 
 ## Development
 
@@ -247,6 +279,14 @@ Two things sit outside it:
   Their terms come from ROHM's notice in each file, not from `LICENSE`, and
   p-ban.com Corp. cannot sublicense them. Their copyright notices must not be
   removed.
+- `driver/lib/SolistAi_Library_*.a` (the Solist-AI accelerator library) and
+  `jlink/ML63Q25x7.FLM` (the flash algorithm) are **copyright ROHM Co., Ltd.**
+  on those same terms. Being binaries they carry no header of their own, so
+  their notice lives in [`driver/lib/README.md`](driver/lib/README.md) and in
+  the comment block of `jlink/JLinkDevices.xml`. Read
+  [`driver/lib/README.md`](driver/lib/README.md) before shipping or passing on
+  anything that contains them — ROHM's notice grants no right of
+  redistribution.
 
 [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) has the per-file
 breakdown. Attribution summary: [`NOTICE`](NOTICE).

@@ -9,6 +9,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/test_main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test_framework.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test_device.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_uart_print.c
     # Add more test suite files here:
     # ${CMAKE_CURRENT_SOURCE_DIR}/test_<area>.c
 )

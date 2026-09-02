@@ -51,8 +51,13 @@
  * Initialize debug UART
  * Configures UART0 with specified baud rate on P32/P33
  *
+ * Note that success is reported as true, not as 0. Callers that mix this up
+ * with the device_* convention (0 = success) read a working UART as a failure.
+ *
  * @param       -
- * @return      true if successful, false otherwise
+ * @return      true if UARTF0 accepted and retained the configuration,
+ *              false if it did not (typically because the UARTF0 peripheral
+ *              clock is not enabled, which leaves the transmitter silent)
  */
 bool uart_print_init(void);
 
@@ -129,50 +134,50 @@ void uart_print_flush(void);
 
 /* Debug print macros with level control */
 #if UART_PRINT_LEVEL >= UART_PRINT_LEVEL_ERROR
-    #define UART_PRINT_ERROR(fmt, ...)   uart_print_printf("[ERROR] " fmt "\r\n", ##__VA_ARGS__)
+  #define UART_PRINT_ERROR(fmt, ...)   uart_print_printf("[ERROR] " fmt "\r\n", ##__VA_ARGS__)
 #else
-    #define UART_PRINT_ERROR(fmt, ...)   ((void)0)
+  #define UART_PRINT_ERROR(fmt, ...)   ((void)0)
 #endif
 
 #if UART_PRINT_LEVEL >= UART_PRINT_LEVEL_WARNING
-    #define UART_PRINT_WARN(fmt, ...)    uart_print_printf("[WARN]  " fmt "\r\n", ##__VA_ARGS__)
+  #define UART_PRINT_WARN(fmt, ...)    uart_print_printf("[WARN]  " fmt "\r\n", ##__VA_ARGS__)
 #else
-    #define UART_PRINT_WARN(fmt, ...)    ((void)0)
+  #define UART_PRINT_WARN(fmt, ...)    ((void)0)
 #endif
 
 #if UART_PRINT_LEVEL >= UART_PRINT_LEVEL_INFO
-    #define UART_PRINT_INFO(fmt, ...)    uart_print_printf("[INFO]  " fmt "\r\n", ##__VA_ARGS__)
+  #define UART_PRINT_INFO(fmt, ...)    uart_print_printf("[INFO]  " fmt "\r\n", ##__VA_ARGS__)
 #else
-    #define UART_PRINT_INFO(fmt, ...)    ((void)0)
+  #define UART_PRINT_INFO(fmt, ...)    ((void)0)
 #endif
 
 #if UART_PRINT_LEVEL >= UART_PRINT_LEVEL_DEBUG
-    #define UART_PRINT_DEBUG(fmt, ...)   uart_print_printf("[DEBUG] " fmt "\r\n", ##__VA_ARGS__)
+  #define UART_PRINT_DEBUG(fmt, ...)   uart_print_printf("[DEBUG] " fmt "\r\n", ##__VA_ARGS__)
 #else
-    #define UART_PRINT_DEBUG(fmt, ...)   ((void)0)
+  #define UART_PRINT_DEBUG(fmt, ...)   ((void)0)
 #endif
 
 #if UART_PRINT_LEVEL >= UART_PRINT_LEVEL_VERBOSE
-    #define UART_PRINT_VERBOSE(fmt, ...) uart_print_printf("[VERB]  " fmt "\r\n", ##__VA_ARGS__)
+  #define UART_PRINT_VERBOSE(fmt, ...) uart_print_printf("[VERB]  " fmt "\r\n", ##__VA_ARGS__)
 #else
-    #define UART_PRINT_VERBOSE(fmt, ...) ((void)0)
+  #define UART_PRINT_VERBOSE(fmt, ...) ((void)0)
 #endif
 
 /* Hex dump macro */
 #define UART_PRINT_HEX_DUMP(data, len, prefix) \
-    do { \
-        if (UART_PRINT_LEVEL >= UART_PRINT_LEVEL_INFO) { \
-            uart_print_hex_dump((data), (len), (prefix)); \
-        } \
-    } while(0)
+  do { \
+    if (UART_PRINT_LEVEL >= UART_PRINT_LEVEL_INFO) { \
+      uart_print_hex_dump((data), (len), (prefix)); \
+    } \
+  } while(0)
 
 /* Assert macro with debug output */
 #define UART_PRINT_ASSERT(condition) \
-    do { \
-        if (!(condition)) { \
-            UART_PRINT_ERROR("ASSERT FAILED: %s at %s:%d", #condition, __FILE__, __LINE__); \
-            while(1); \
-        } \
-    } while(0)
+  do { \
+    if (!(condition)) { \
+      UART_PRINT_ERROR("ASSERT FAILED: %s at %s:%d", #condition, __FILE__, __LINE__); \
+      while(1); \
+    } \
+  } while(0)
 
 #endif /* UART_PRINT_H__ */
