@@ -25,8 +25,12 @@
 /*#                                 Defines                                  #*/
 /*############################################################################*/
 
-/* UART Configuration */
-#define UART_PRINT_BAUD_RATE    115200  /* Debug UART baud rate */
+/* UART Configuration
+ *
+ * These two name the port-3 pins handed to UARTF0; s_configure_gpio() in
+ * uart_print.c derives the P3MOD0 field positions from them. The baud rate is
+ * NOT set here -- it comes from UARTF_PARAM_DLR / UARTF_PARAM_CAJ in
+ * uart_print.c, which are divisor values tied to the 48 MHz SYSCLK. */
 #define UART_PRINT_TX_PIN       33      /* P33 for TX */
 #define UART_PRINT_RX_PIN       32      /* P32 for RX */
 

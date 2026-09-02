@@ -165,7 +165,8 @@ UART_PRINT_INFO("boot complete, sysclk=%lu Hz", device_get_sysclk());
 **To modify:**
 
 - **Change the compiled-in log level:** pass `-DUART_PRINT_LEVEL=UART_PRINT_LEVEL_INFO` to the compiler, or edit the default in `src/uart_print.h` (`UART_PRINT_LEVEL_NONE` through `UART_PRINT_LEVEL_VERBOSE`). Lower-than-threshold macros compile to `((void)0)` — no code, no flash, no UART traffic.
-- **Change baud or pins:** edit `UART_PRINT_BAUD_RATE` / `UART_PRINT_TX_PIN` / `UART_PRINT_RX_PIN` in `src/uart_print.h`, plus `UARTF_PARAM_DLR` (baudrate divisor) and the GPIO config in `s_configure_gpio()` inside `src/uart_print.c`.
+- **Change the pins:** edit `UART_PRINT_TX_PIN` / `UART_PRINT_RX_PIN` in `src/uart_print.h`. `s_configure_gpio()` derives the `P3MOD0` field positions from them, so nothing else needs touching as long as the new pins are on PORT3 and their UARTF0 function codes still apply.
+- **Change the baud rate:** edit `UARTF_PARAM_DLR` and `UARTF_PARAM_CAJ` in `src/uart_print.c`. These are divisor values for the 48 MHz SYSCLK and are the only thing that sets the rate — there is no baud-rate constant in the header.
 
 ### 5.3 Interrupt stubs — `src/app_irq.c`
 

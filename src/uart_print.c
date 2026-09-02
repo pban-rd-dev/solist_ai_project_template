@@ -41,6 +41,21 @@
 /* #define UARTF_PARAM_CAJ         (UARTF_RMV_ENA | 0x000DU) */
 /* #define UARTF_PARAM_DLR         (0x000AU)  /\* baudrate : 115200bps at SYSCLK20MHz *\/ */
 
+/* P3MOD0 holds one 6-bit mode field per pin on an 8-bit stride: P30 at bit 0,
+ * P31 at bit 8, P32 at bit 16, P33 at bit 24. This is the layout ROHM's own
+ * smpl_initLED1..3() use for P5MOD0 in utility/board/smpl_common_led.c. */
+#define P3MOD_FIELD_MASK        (0x3FU)
+#define P3MOD_SHIFT(port3_pin)  ((uint32_t)(port3_pin) * 8U)
+
+/* Mode codes written into that field. 0x0A is what ROHM calls "general-purpose
+ * mode"; it is the same value for every pin. */
+#define P3MOD_MODE_GPIO         (0x0AU)
+#define P3MOD_MODE_UARTF0_RX    (0x21U)
+#define P3MOD_MODE_UARTF0_TX    (0x23U)
+
+/* Pins are numbered port * 10 + index, so P33 is index 3 of PORT3. */
+#define PORT3_PIN(pin)          ((uint32_t)(pin) - 30U)
+
 /* Bits of UAF0MOD that hold their written value after uartf0_init(). The FIFO
  * reset bits UFnRFR/UFnTFR are excluded because uartf0_init() pulses them, and
  * the reserved bits are excluded because their read value is not specified. */
@@ -63,32 +78,32 @@ static char s_printf_buffer[PRINTF_BUFFER_SIZE];
 /*############################################################################*/
 
 /**
- * Configure GPIO pins for UART
+ * Write one pin's mode field in P3MOD0, leaving the other pins alone.
+ *
+ * Both the UART bring-up and the teardown go through here, so the field
+ * positions are stated once instead of being open-coded at each site.
+ *
+ * @param[in]   port3_pin   Pin index within PORT3 (0-3)
+ * @param[in]   mode        Mode code for that pin
+ * @return      -
+ */
+static void s_set_port3_pin_mode(uint32_t port3_pin, uint32_t mode)
+{
+  write_bit(PORT3->P3MOD0,
+            P3MOD_FIELD_MASK << P3MOD_SHIFT(port3_pin),
+            mode << P3MOD_SHIFT(port3_pin));
+}
+
+/**
+ * Hand P32/P33 to UARTF0
  */
 static void s_configure_gpio(void)
 {
-  /* Configure P33 (bit 3) and P32 (bit 2) for UART0 */
-  /* P3MOD0 register controls pins P30-P33 */
-  /* Each pin uses 6 bits: [5:0] for mode configuration */
-  /* P30: bits [5:0], P31: bits [11:6], P32: bits [17:12], P33: bits [23:18] */
+  s_set_port3_pin_mode(PORT3_PIN(UART_PRINT_RX_PIN), P3MOD_MODE_UARTF0_RX);
+  s_set_port3_pin_mode(PORT3_PIN(UART_PRINT_TX_PIN), P3MOD_MODE_UARTF0_TX);
 
-  /* Read current P3MOD0 value */
-  uint32_t p3mod0 = read_reg32(PORT3->P3MOD0);
-
-  /* Clear bits for P32 (bits 23:16) and P33 (bits 31:24) */
-  p3mod0 &= ~((0x3F << 16) | (0x3F << 24));
-
-  /* Set P32 as UARTF0_RX */
-  p3mod0 |= (0x21 << 16);
-
-  /* Set P33 as UARTF0_TX */
-  p3mod0 |= (0x23 << 24);
-
-  /* Write back to P3MOD0 */
-  write_reg32(PORT3->P3MOD0, p3mod0);
-
-  /* Set P33 output high (idle state for UART TX) */
-  set_bit(PORT3->P3DO, (1 << 3));
+  /* Drive TX high: the idle level for a UART line. */
+  set_bit(PORT3->P3DO, 1U << PORT3_PIN(UART_PRINT_TX_PIN));
 }
 
 /**
@@ -159,17 +174,9 @@ void uart_print_deinit(void)
   /* Wait for any pending transmission */
   uart_print_flush();
 
-  /* Reset GPIO pins to default state (GPIO input) */
-  uint32_t p3mod0 = read_reg32(PORT3->P3MOD0);
-
-  /* Clear bits for P32 (bits 17:12) and P33 (bits 23:18) */
-  p3mod0 &= ~((0x3F << 12) | (0x3F << 18));
-
-  /* Set both pins as GPIO input (0x0A) */
-  p3mod0 |= (0x0A << 12) | (0x0A << 18);
-
-  /* Write back to P3MOD0 */
-  write_reg32(PORT3->P3MOD0, p3mod0);
+  /* Give P32/P33 back to general-purpose mode. */
+  s_set_port3_pin_mode(PORT3_PIN(UART_PRINT_RX_PIN), P3MOD_MODE_GPIO);
+  s_set_port3_pin_mode(PORT3_PIN(UART_PRINT_TX_PIN), P3MOD_MODE_GPIO);
 
   s_uart_initialized = false;
 }

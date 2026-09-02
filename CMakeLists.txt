@@ -41,10 +41,15 @@ set(CMAKE_C_FLAGS_RELEASE "-Os -DNDEBUG")
 
 # Linker flags
 # newlib-nano is prebuilt with -fshort-enums, so it disagrees with the flag
-# above and ld reports the difference for every object. The disagreement is
-# inert: the C library exposes no enum in its API, while the pair that does
-# matter -- this project's code and the ROHM Solist-AI archives -- now agree on
-# 32-bit enums. Silence the report rather than let it bury real link errors.
+# above and ld reports the difference for every object. Silencing that report
+# is a deliberate trade: the pair that matters -- this project's code and the
+# ROHM Solist-AI archives -- now agree on 32-bit enums, and the C library
+# functions a firmware actually calls (stdio, stdlib, string, math, time,
+# errno) take no enum across the boundary. The exception is <search.h>:
+# hsearch(ENTRY, ACTION) and the twalk() callback's VISIT really do pass an
+# enum to and from newlib. Do not use those here, and re-check this flag if
+# you ever link another prebuilt library -- the warning that would have caught
+# a width mismatch is off.
 set(CMAKE_EXE_LINKER_FLAGS "${CPU_FLAGS} -specs=nano.specs -Wl,--gc-sections -Wl,--no-enum-size-warning")
 
 # Build options
