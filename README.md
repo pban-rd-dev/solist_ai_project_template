@@ -288,6 +288,23 @@ Two things sit outside it:
   anything that contains them — ROHM's notice grants no right of
   redistribution.
 
+### Why this repository is public
+
+p-ban.com Corp. distributes this repository, including the ROHM-owned files
+above, under its partner agreement with ROHM Co., Ltd. That agreement permits
+p-ban.com Corp. to provide ROHM-supplied software to third parties, and places
+sole responsibility for doing so on p-ban.com Corp.
+
+That basis does not extend to you. It is p-ban.com Corp.'s right to
+distribute, not a licence for you to redistribute — which is why the
+no-redistribution rule above still applies to you even though this repository
+is published. Your rights in the ROHM-owned files come only from the ROHM
+notice at the head of each file.
+
+ROHM Co., Ltd. carries no warranty, support, or liability obligation for this
+repository or for anything built from it. Direct all questions to
+p-ban.com Corp., not to ROHM.
+
 [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md) has the per-file
 breakdown. Attribution summary: [`NOTICE`](NOTICE).
 

@@ -48,6 +48,10 @@ What this means:
   and their license from ROHM and follow ROHM's terms directly.
 - An `ar` archive cannot carry a copyright header of its own. This file is
   that notice — keep it next to the archives.
+- p-ban.com Corp.'s own right to publish these archives comes from its
+  partner agreement with ROHM, not from the notice above, and does not extend
+  to you. See §0 of
+  [`../../THIRD_PARTY_LICENSES.md`](../../THIRD_PARTY_LICENSES.md).
 
 See [`../../THIRD_PARTY_LICENSES.md`](../../THIRD_PARTY_LICENSES.md) §2 for
 the rest of the ROHM-owned files in this repository.

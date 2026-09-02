@@ -16,6 +16,19 @@ you ever want to do something outside the rule above.
 | Startup / system / linker script | ROHM Co., Ltd., portions by Arm Limited | Apache-2.0 — **not** restricted by `LICENSE` |
 | `external/CMSIS` (git submodule) | Arm Limited | Apache-2.0 — **not** restricted by `LICENSE` |
 
+## 0. Why this repository is public
+
+p-ban.com Corp. distributes this repository, including the ROHM-owned files
+listed in §2, under its partner agreement with ROHM Co., Ltd. That agreement
+permits p-ban.com Corp. to provide ROHM-supplied software to third parties,
+and places sole responsibility for doing so on p-ban.com Corp.
+
+That basis does not extend to you. It is p-ban.com Corp.'s right to
+distribute, not a licence for you to redistribute. Your rights in the
+ROHM-owned files come only from the ROHM notice at the head of each file,
+quoted in §2 — which is why the no-redistribution rule above still applies to
+you even though this repository is published.
+
 ## 1. p-ban.com Corp.
 
 ```
@@ -98,6 +111,8 @@ What this means for you:
   `ML63Q2500_ReferenceSoftware` package and its license from ROHM and
   follow ROHM's terms directly.
 - Neither ROHM nor p-ban.com Corp. warrants these files. See §5 below.
+- p-ban.com Corp.'s own right to publish these files comes from its partner
+  agreement with ROHM, not from the notice above. See §0.
 
 ### What was modified
 
@@ -162,3 +177,9 @@ OR CONDITIONS OF ANY KIND, as stated in `LICENSE`.
 The ROHM files are provided "as is" by ROHM, as quoted in §2. p-ban.com
 Corp. likewise provides this repository as a whole without warranty of any
 kind and accepts no liability arising from its use.
+
+ROHM Co., Ltd. carries no warranty, support, or liability obligation for this
+repository or for anything built from it. Publishing it is p-ban.com Corp.'s
+decision under the agreement described in §0, and the responsibility that
+comes with it rests with p-ban.com Corp. Direct all questions about this
+repository to p-ban.com Corp., not to ROHM.
